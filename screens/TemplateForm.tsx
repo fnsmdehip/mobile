@@ -20,13 +20,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SignatureCanvas from 'react-native-signature-canvas';
+import { Ionicons } from '@expo/vector-icons';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { getTemplateById, fillTemplate } from '../data/templates';
 import db from '../services/database';
 import exportService from '../services/export';
 import purchaseService from '../services/purchases';
 import type { ConsentRecord, SignatureData, PartyInfo } from '../types';
-import { Colors, Typography, Spacing, BorderRadius, Shadows, MIN_TOUCH_SIZE, Assets } from '../constants/theme';
+import { Colors, Typography, Spacing, BorderRadius, Shadows, CardBorder, MIN_TOUCH_SIZE, Assets } from '../constants/theme';
 
 const TEMPLATE_ICON_MAP: Record<string, number> = {
   tpl_medical_consent: Assets.iconChecklist,
@@ -100,7 +101,7 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ navigation, route }) => {
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
           <View style={styles.errorIconContainer}>
-            <Text style={styles.errorIcon}>{'\u{26A0}\uFE0F'}</Text>
+            <Ionicons name="warning-outline" size={36} color={Colors.error} />
           </View>
           <Text style={styles.errorTitle}>Template Not Found</Text>
           <Text style={styles.errorText}>
@@ -359,7 +360,7 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ navigation, route }) => {
             {/* Expiry Notice */}
             {template.defaultExpiryDays != null && (
               <View style={styles.expiryNotice}>
-                <Text style={styles.expiryIcon}>{'\u{23F3}'}</Text>
+                <Ionicons name="hourglass-outline" size={20} color="#92400E" style={{ marginRight: Spacing.md }} />
                 <Text style={styles.expiryText}>
                   This consent will expire {template.defaultExpiryDays} days after signing.
                 </Text>
@@ -440,6 +441,7 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     color: Colors.textTertiary,
     textAlign: 'right',
+    fontVariant: ['tabular-nums'],
   },
   scrollContent: {
     padding: Spacing.lg,
@@ -492,9 +494,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     padding: Spacing.lg,
     borderRadius: BorderRadius.lg,
-    marginBottom: Spacing.lg,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    marginBottom: Spacing.section,
+    ...CardBorder,
+    ...Shadows.card,
   },
   templateIconContainer: {
     width: 56,
@@ -523,10 +525,11 @@ const styles = StyleSheet.create({
   templateDescription: {
     ...Typography.bodySmall,
     color: Colors.textSecondary,
-    lineHeight: 22,
+    fontWeight: '300',
+    lineHeight: 24,
   },
   formSection: {
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.section,
   },
   sectionTitle: {
     ...Typography.overline,
@@ -576,13 +579,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   previewSection: {
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.section,
   },
   previewCard: {
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    ...CardBorder,
+    ...Shadows.card,
     maxHeight: 250,
     overflow: 'hidden',
   },
@@ -595,7 +598,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   signatureSection: {
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.section,
   },
   signatureCanvas: {
     height: 200,

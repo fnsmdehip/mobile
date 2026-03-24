@@ -18,7 +18,7 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import { getAllTemplates } from '../data/templates';
 import usePurchases from '../hooks/usePurchases';
 import type { ConsentTemplate, TemplateCategory } from '../types';
-import { Colors, Typography, Spacing, BorderRadius, Shadows, MIN_TOUCH_SIZE, FREE_TIER_LIMIT, Assets } from '../constants/theme';
+import { Colors, Typography, Spacing, BorderRadius, Shadows, CardBorder, MIN_TOUCH_SIZE, FREE_TIER_LIMIT, Assets } from '../constants/theme';
 
 interface HomeScreenProps {
   navigation: {
@@ -266,6 +266,8 @@ const styles = StyleSheet.create({
     ...Typography.bodySmall,
     color: Colors.textTertiary,
     marginTop: 2,
+    fontWeight: '300',
+    lineHeight: 24,
   },
   tierBadge: {
     backgroundColor: Colors.surfaceElevated,
@@ -279,6 +281,7 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     color: Colors.textSecondary,
     fontWeight: '600',
+    fontVariant: ['tabular-nums'],
   },
   proBadge: {
     backgroundColor: Colors.primaryLight,
@@ -289,6 +292,7 @@ const styles = StyleSheet.create({
   },
   quickActionsContainer: {
     padding: Spacing.lg,
+    paddingBottom: Spacing.section,
   },
   sectionLabel: {
     ...Typography.overline,
@@ -305,9 +309,8 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-    ...Shadows.sm,
+    ...CardBorder,
+    ...Shadows.card,
     minHeight: MIN_TOUCH_SIZE,
   },
   quickActionIconContainer: {
@@ -376,6 +379,8 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     color: Colors.primaryDark,
     marginTop: 2,
+    fontWeight: '300',
+    lineHeight: 24,
   },
   upgradeBannerArrow: {
     fontSize: 28,
@@ -402,9 +407,8 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-    ...Shadows.sm,
+    ...CardBorder,
+    ...Shadows.card,
   },
   templateCardLocked: {
     opacity: 0.65,
@@ -441,7 +445,8 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     color: Colors.textTertiary,
     marginTop: 2,
-    lineHeight: 18,
+    fontWeight: '300',
+    lineHeight: 24,
   },
   templateMeta: {
     flexDirection: 'row',

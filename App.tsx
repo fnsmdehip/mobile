@@ -19,6 +19,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Text, View, Image, StyleSheet, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import ErrorBoundary from './components/ErrorBoundary';
@@ -50,24 +51,25 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 
 /**
- * Tab bar icon component using custom image assets.
- * Each icon maps to a .png asset from /assets/.
+ * Tab bar icon component using Ionicons.
+ * NutriAI polish: Ionicons for crisp vector tab icons.
  */
 function TabBarIcon({ routeName, focused }: { routeName: string; focused: boolean }) {
-  const iconMap: Record<string, number> = {
-    Forms: Assets.iconChecklist,
-    Records: Assets.iconSignature,
-    Settings: Assets.iconCloudLock,
+  const iconMap: Record<string, { active: keyof typeof Ionicons.glyphMap; inactive: keyof typeof Ionicons.glyphMap }> = {
+    Forms: { active: 'document-text', inactive: 'document-text-outline' },
+    Records: { active: 'folder', inactive: 'folder-outline' },
+    Settings: { active: 'settings', inactive: 'settings-outline' },
   };
 
-  const source = iconMap[routeName] || Assets.iconChecklist;
+  const icons = iconMap[routeName] || iconMap.Forms;
+  const iconName = focused ? icons.active : icons.inactive;
 
   return (
     <View style={tabStyles.iconWrapper}>
-      <Image
-        source={source}
-        style={[tabStyles.icon, focused && tabStyles.iconFocused]}
-        resizeMode="contain"
+      <Ionicons
+        name={iconName}
+        size={focused ? 24 : 22}
+        color={focused ? Colors.primary : Colors.tabBarInactive}
       />
       {focused && <View style={tabStyles.indicator} />}
     </View>
@@ -79,16 +81,6 @@ const tabStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: 4,
-  },
-  icon: {
-    width: 22,
-    height: 22,
-    opacity: 0.5,
-  },
-  iconFocused: {
-    width: 24,
-    height: 24,
-    opacity: 1,
   },
   indicator: {
     width: 5,

@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert, Modal } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, BorderRadius, Shadows, PRO_MONTHLY_PRICE, PRO_YEARLY_PRICE, Assets } from '../constants/theme';
 import purchaseService from '../services/purchases';
 
@@ -68,7 +69,7 @@ const PaywallGate: React.FC<PaywallGateProps> = ({
     <>
       <Pressable style={styles.lockedContainer} onPress={() => setShowModal(true)}>
         <View style={styles.lockedOverlay}>
-          <Text style={styles.lockIcon}>{'\u{1F512}'}</Text>
+          <Ionicons name="lock-closed-outline" size={32} color={Colors.textSecondary} style={{ marginBottom: Spacing.sm }} />
           <Text style={styles.lockedTitle}>Pro Feature</Text>
           <Text style={styles.lockedSubtitle}>Tap to learn more</Text>
         </View>
@@ -188,6 +189,8 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.textSecondary,
     textAlign: 'center',
+    fontWeight: '300',
+    lineHeight: 24,
     marginBottom: Spacing.xl,
   },
   pricingBox: {
@@ -199,6 +202,7 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontWeight: '700',
     color: Colors.primary,
+    fontVariant: ['tabular-nums'],
   },
   priceUnit: {
     ...Typography.body,

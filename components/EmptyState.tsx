@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { View, Text, Image, StyleSheet, Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, BorderRadius, MIN_TOUCH_SIZE, Assets } from '../constants/theme';
 
 interface EmptyStateProps {
@@ -35,7 +36,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         />
       ) : (
         <View style={styles.iconContainer}>
-          <Text style={styles.icon}>{icon || '\u{1F4CB}'}</Text>
+          <Ionicons name="clipboard-outline" size={44} color={Colors.primary} />
         </View>
       )}
       <Text style={styles.title}>{title}</Text>
@@ -85,6 +86,7 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.textSecondary,
     textAlign: 'center',
+    fontWeight: '300',
     lineHeight: 24,
     marginBottom: Spacing.xl,
   },

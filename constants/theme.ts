@@ -60,13 +60,14 @@ export const Colors = {
 } as const;
 
 export const Typography = {
-  // SF Pro Display for hero numbers
+  // SF Pro Display for hero numbers - NutriAI polish: ultralight weight, tight tracking
   heroNumber: {
-    fontSize: 48,
-    lineHeight: 56,
-    fontWeight: '700' as const,
+    fontSize: 54,
+    lineHeight: 62,
+    fontWeight: '200' as const,
     fontFamily: Platform.OS === 'ios' ? 'System' : undefined,
-    letterSpacing: -1,
+    letterSpacing: -2,
+    fontVariant: ['tabular-nums'] as const,
   },
   h1: {
     fontSize: 28,
@@ -127,6 +128,8 @@ export const Spacing = {
   md: 12,
   lg: 16,
   xl: 24,
+  // NutriAI polish: 24-28px section gaps
+  section: 28,
   xxl: 32,
   xxxl: 48,
 } as const;
@@ -148,6 +151,14 @@ export const Shadows = {
     shadowRadius: 3,
     elevation: 1,
   },
+  // NutriAI card depth: subtle shadow for light theme cards
+  card: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
   md: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -162,6 +173,12 @@ export const Shadows = {
     shadowRadius: 16,
     elevation: 6,
   },
+} as const;
+
+// NutriAI card depth border style for light theme
+export const CardBorder = {
+  borderWidth: 1,
+  borderColor: 'rgba(0,0,0,0.08)',
 } as const;
 
 // Touch target minimum 44x44pt

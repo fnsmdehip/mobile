@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { ScrollView, View, Text, Image, StyleSheet, Pressable, Alert } from 'react-native';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import { Colors, Typography, Spacing, BorderRadius, Shadows, Assets } from '../constants/theme';
+import { Colors, Typography, Spacing, BorderRadius, Shadows, CardBorder, Assets } from '../constants/theme';
 
 const initialItems: string[] = [
   'I have read and understood the purpose of this consent.',
@@ -124,7 +124,9 @@ const styles = StyleSheet.create({
   description: {
     ...Typography.body,
     color: Colors.textSecondary,
-    marginBottom: Spacing.xl,
+    fontWeight: '300',
+    lineHeight: 24,
+    marginBottom: Spacing.section,
   },
   itemRow: {
     flexDirection: 'row',
@@ -133,8 +135,8 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     borderRadius: BorderRadius.lg,
     marginBottom: Spacing.sm,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    ...CardBorder,
+    ...Shadows.card,
   },
   checkbox: {
     width: 24,

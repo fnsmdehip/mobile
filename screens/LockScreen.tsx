@@ -15,6 +15,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import authService from '../services/auth';
 import { Colors, Typography, Spacing, BorderRadius, Shadows, MIN_TOUCH_SIZE, Assets } from '../constants/theme';
 
@@ -247,14 +248,13 @@ const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               onPress={() => handleDigitPress(digit)}
               disabled={digit === '' || loading}
             >
-              <Text
-                style={[
-                  styles.numKeyText,
-                  digit === 'del' && styles.numKeyDelText,
-                ]}
-              >
-                {digit === 'del' ? '\u{232B}' : digit}
-              </Text>
+              {digit === 'del' ? (
+                <Ionicons name="backspace-outline" size={24} color={Colors.textSecondary} />
+              ) : (
+                <Text style={styles.numKeyText}>
+                  {digit}
+                </Text>
+              )}
             </Pressable>
           ))}
         </View>
@@ -384,6 +384,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '400',
     color: Colors.textPrimary,
+    fontVariant: ['tabular-nums'],
   },
   numKeyDelText: {
     fontSize: 24,

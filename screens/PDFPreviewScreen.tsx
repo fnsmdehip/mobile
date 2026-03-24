@@ -17,12 +17,13 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import ErrorBoundary from '../components/ErrorBoundary';
 import StatusBadge from '../components/StatusBadge';
 import db from '../services/database';
 import exportService from '../services/export';
 import type { ConsentRecord } from '../types';
-import { Colors, Typography, Spacing, BorderRadius, Shadows, MIN_TOUCH_SIZE, Assets } from '../constants/theme';
+import { Colors, Typography, Spacing, BorderRadius, Shadows, CardBorder, MIN_TOUCH_SIZE, Assets } from '../constants/theme';
 
 interface PDFPreviewScreenProps {
   navigation: {
@@ -85,7 +86,7 @@ const PDFPreviewScreen: React.FC<PDFPreviewScreenProps> = ({ navigation, route }
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
-          <Text style={styles.errorIcon}>{'\u{26A0}\uFE0F'}</Text>
+          <Ionicons name="warning-outline" size={48} color={Colors.error} style={{ marginBottom: Spacing.lg }} />
           <Text style={styles.errorTitle}>Record Not Found</Text>
           <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
             <Text style={styles.backButtonText}>Go Back</Text>
@@ -120,9 +121,12 @@ const PDFPreviewScreen: React.FC<PDFPreviewScreenProps> = ({ navigation, route }
             {integrityVerified === true ? (
               <Image source={Assets.iconShield} style={styles.integrityImage} resizeMode="contain" />
             ) : (
-              <Text style={styles.integrityIcon}>
-                {integrityVerified === false ? '\u{26A0}\uFE0F' : '\u{23F3}'}
-              </Text>
+              <Ionicons
+                name={integrityVerified === false ? 'warning-outline' : 'hourglass-outline'}
+                size={28}
+                color={integrityVerified === false ? Colors.error : Colors.textTertiary}
+                style={{ marginRight: Spacing.md }}
+              />
             )}
             <View style={styles.integrityInfo}>
               <Text style={styles.integrityTitle}>
@@ -285,10 +289,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.lg,
     padding: Spacing.xl,
-    marginBottom: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-    ...Shadows.sm,
+    marginBottom: Spacing.section,
+    ...CardBorder,
+    ...Shadows.card,
   },
   headerTop: {
     flexDirection: 'row',
@@ -317,9 +320,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surfaceElevated,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
-    marginBottom: Spacing.lg,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    marginBottom: Spacing.section,
+    ...CardBorder,
+    ...Shadows.card,
   },
   integrityVerified: {
     backgroundColor: Colors.successLight,
@@ -353,7 +356,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   section: {
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.section,
   },
   sectionTitle: {
     ...Typography.overline,
@@ -397,8 +400,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    ...CardBorder,
+    ...Shadows.card,
     maxHeight: 300,
   },
   consentText: {

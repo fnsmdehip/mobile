@@ -28,7 +28,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import authService from '../services/auth';
 import {
-  Colors, Typography, Spacing, BorderRadius, Shadows,
+  Colors, Typography, Spacing, BorderRadius, Shadows, CardBorder,
   MIN_TOUCH_SIZE, PRO_MONTHLY_PRICE, PRO_YEARLY_PRICE, Assets,
 } from '../constants/theme';
 
@@ -580,7 +580,8 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 26,
+    fontWeight: '300',
+    lineHeight: 24,
     marginBottom: Spacing.xxl,
     maxWidth: 320,
   },
@@ -619,7 +620,8 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 26,
+    fontWeight: '300',
+    lineHeight: 24,
     maxWidth: 320,
     marginBottom: Spacing.xl,
   },
@@ -782,6 +784,8 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.textSecondary,
     textAlign: 'center',
+    fontWeight: '300',
+    lineHeight: 24,
     marginBottom: Spacing.xl,
   },
   planCard: {
@@ -849,6 +853,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     color: Colors.primary,
+    fontVariant: ['tabular-nums'],
   },
   planPricePeriod: {
     fontSize: 15,

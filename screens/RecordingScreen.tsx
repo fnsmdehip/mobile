@@ -21,10 +21,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import { Ionicons } from '@expo/vector-icons';
 import ErrorBoundary from '../components/ErrorBoundary';
 import PaywallGate from '../components/PaywallGate';
 import usePurchases from '../hooks/usePurchases';
-import { Colors, Typography, Spacing, BorderRadius } from '../constants/theme';
+import { Colors, Typography, Spacing, BorderRadius, Shadows, CardBorder } from '../constants/theme';
 
 interface RecordingScreenProps {
   navigation: {
@@ -278,7 +279,7 @@ const RecordingScreen: React.FC<RecordingScreenProps> = () => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.centeredContent}>
-          <Text style={styles.permissionIcon}>{'\u{1F3A4}'}</Text>
+          <Ionicons name="mic-outline" size={48} color={Colors.textTertiary} />
           <Text style={styles.permissionTitle}>
             Microphone Access Required
           </Text>
@@ -362,9 +363,7 @@ const RecordingScreen: React.FC<RecordingScreenProps> = () => {
                     style={styles.controlButton}
                     onPress={isPlaying ? stopPlayback : playRecording}
                   >
-                    <Text style={styles.controlButtonIcon}>
-                      {isPlaying ? '\u{23F9}' : '\u{25B6}\uFE0F'}
-                    </Text>
+                    <Ionicons name={isPlaying ? 'stop-circle-outline' : 'play-circle-outline'} size={28} color={Colors.primary} />
                     <Text style={styles.controlLabel}>
                       {isPlaying ? 'Stop' : 'Play'}
                     </Text>
@@ -374,7 +373,7 @@ const RecordingScreen: React.FC<RecordingScreenProps> = () => {
                     style={styles.controlButton}
                     onPress={startRecording}
                   >
-                    <Text style={styles.controlButtonIcon}>{'\u{1F504}'}</Text>
+                    <Ionicons name="refresh-outline" size={28} color={Colors.primary} />
                     <Text style={styles.controlLabel}>Re-record</Text>
                   </Pressable>
 
@@ -382,7 +381,7 @@ const RecordingScreen: React.FC<RecordingScreenProps> = () => {
                     style={styles.controlButton}
                     onPress={shareRecording}
                   >
-                    <Text style={styles.controlButtonIcon}>{'\u{1F4E4}'}</Text>
+                    <Ionicons name="share-outline" size={28} color={Colors.primary} />
                     <Text style={styles.controlLabel}>Share</Text>
                   </Pressable>
 
@@ -390,7 +389,7 @@ const RecordingScreen: React.FC<RecordingScreenProps> = () => {
                     style={styles.controlButton}
                     onPress={deleteRecording}
                   >
-                    <Text style={styles.controlButtonIcon}>{'\u{1F5D1}'}</Text>
+                    <Ionicons name="trash-outline" size={28} color={Colors.error} />
                     <Text style={styles.controlLabel}>Delete</Text>
                   </Pressable>
                 </View>
@@ -470,6 +469,8 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.textSecondary,
     textAlign: 'center',
+    fontWeight: '300',
+    lineHeight: 24,
   },
   statusSection: {
     flexDirection: 'row',
@@ -497,10 +498,10 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   timerText: {
-    fontSize: 48,
+    fontSize: 54,
     fontWeight: '200',
     color: Colors.textPrimary,
-    letterSpacing: 4,
+    letterSpacing: -2,
     fontVariant: ['tabular-nums'],
   },
   waveformContainer: {
@@ -562,9 +563,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
-    marginBottom: Spacing.lg,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    marginBottom: Spacing.section,
+    ...CardBorder,
+    ...Shadows.card,
     alignItems: 'center',
   },
   premiumBadge: {
@@ -589,6 +590,8 @@ const styles = StyleSheet.create({
     ...Typography.bodySmall,
     color: Colors.textSecondary,
     textAlign: 'center',
+    fontWeight: '300',
+    lineHeight: 24,
   },
   tipsSection: {
     backgroundColor: Colors.primaryLight,

@@ -25,7 +25,7 @@ import { SkeletonList } from '../components/SkeletonLoader';
 import db from '../services/database';
 import exportService from '../services/export';
 import type { ConsentRecord, ConsentStatus, DashboardStats } from '../types';
-import { Colors, Typography, Spacing, BorderRadius, Shadows, MIN_TOUCH_SIZE, Assets } from '../constants/theme';
+import { Colors, Typography, Spacing, BorderRadius, Shadows, CardBorder, MIN_TOUCH_SIZE, Assets } from '../constants/theme';
 
 type FilterOption = 'all' | ConsentStatus;
 
@@ -306,6 +306,7 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     padding: Spacing.lg,
+    paddingBottom: Spacing.section,
     gap: Spacing.sm,
   },
   statsRow: {
@@ -318,8 +319,8 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    ...CardBorder,
+    ...Shadows.card,
   },
   statCardWide: {
     flex: 1.5,
@@ -329,9 +330,11 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   statNumber: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 48,
+    fontWeight: '200',
     color: Colors.textPrimary,
+    letterSpacing: -2,
+    fontVariant: ['tabular-nums'],
   },
   statLabel: {
     ...Typography.caption,
@@ -346,8 +349,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    ...CardBorder,
+    ...Shadows.card,
     marginBottom: Spacing.sm,
   },
   searchIcon: {
@@ -406,9 +409,8 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-    ...Shadows.sm,
+    ...CardBorder,
+    ...Shadows.card,
   },
   recordHeader: {
     flexDirection: 'row',
@@ -459,6 +461,7 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     color: Colors.textTertiary,
     marginLeft: Spacing.sm,
+    fontVariant: ['tabular-nums'],
   },
   expiryRow: {
     marginTop: Spacing.sm,

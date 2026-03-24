@@ -21,7 +21,7 @@ import authService from '../services/auth';
 import db from '../services/database';
 import exportService from '../services/export';
 import purchaseService from '../services/purchases';
-import { Colors, Typography, Spacing, BorderRadius, Shadows, MIN_TOUCH_SIZE, PRO_MONTHLY_PRICE, PRO_YEARLY_PRICE, FREE_TIER_LIMIT, Assets } from '../constants/theme';
+import { Colors, Typography, Spacing, BorderRadius, Shadows, CardBorder, MIN_TOUCH_SIZE, PRO_MONTHLY_PRICE, PRO_YEARLY_PRICE, FREE_TIER_LIMIT, Assets } from '../constants/theme';
 import type { Entitlement } from '../types';
 
 interface SettingsProps {
@@ -356,16 +356,15 @@ const styles = StyleSheet.create({
   sectionTitle: {
     ...Typography.overline,
     color: Colors.textTertiary,
-    marginTop: Spacing.xl,
+    marginTop: Spacing.section,
     marginBottom: Spacing.md,
   },
   subscriptionCard: {
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.xl,
     padding: Spacing.xl,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-    ...Shadows.sm,
+    ...CardBorder,
+    ...Shadows.card,
   },
   subscriptionCardPro: {
     borderColor: Colors.primary,
@@ -413,6 +412,7 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     color: Colors.textTertiary,
     textAlign: 'center',
+    fontVariant: ['tabular-nums'],
   },
   proFeaturesList: {
     marginBottom: Spacing.lg,
@@ -460,8 +460,8 @@ const styles = StyleSheet.create({
   settingsGroup: {
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    ...CardBorder,
+    ...Shadows.card,
     overflow: 'hidden',
   },
   settingRow: {
@@ -501,6 +501,8 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     color: Colors.textTertiary,
     marginTop: 2,
+    fontWeight: '300',
+    lineHeight: 24,
   },
   optionsRow: {
     flexDirection: 'row',
@@ -558,8 +560,8 @@ const styles = StyleSheet.create({
     padding: Spacing.xl,
     borderRadius: BorderRadius.lg,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    ...CardBorder,
+    ...Shadows.card,
     marginBottom: Spacing.xxl,
   },
   aboutAppName: {
@@ -577,6 +579,7 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.textSecondary,
     textAlign: 'center',
+    fontWeight: '300',
     lineHeight: 24,
   },
   aboutDivider: {
