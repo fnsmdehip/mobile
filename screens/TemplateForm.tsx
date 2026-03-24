@@ -53,6 +53,60 @@ interface TemplateFormProps {
   };
 }
 
+/**
+ * Validate a single field value based on its type and required status.
+ * Returns an error message string or null if valid.
+ */
+function validateField(
+  key: string,
+  value: string,
+  type: string,
+  required: boolean,
+  _templateId: string
+): string | null {
+  const trimmed = value?.trim() || '';
+
+  if (required && !trimmed) {
+    return 'This field is required';
+  }
+
+  if (!trimmed) return null; // optional and empty = fine
+
+  if (type === 'date') {
+    // Accept YYYY-MM-DD format
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      return 'Enter date as YYYY-MM-DD';
+    }
+    const parsed = new Date(trimmed + 'T00:00:00');
+    if (isNaN(parsed.getTime())) {
+      return 'Invalid date';
+    }
+  }
+
+  if (type === 'email') {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      return 'Enter a valid email address';
+    }
+  }
+
+  if (type === 'number') {
+    if (!/^\d+$/.test(trimmed)) {
+      return 'Enter a valid number';
+    }
+  }
+
+  // Template-specific validations
+  if (key === 'patientName' || key === 'participantName' || key === 'visitorName' ||
+      key === 'subjectName' || key === 'consentGiver' || key === 'consentReceiver' ||
+      key === 'disclosingParty' || key === 'receivingParty' || key === 'partyA' || key === 'partyB') {
+    if (trimmed.length < 2) {
+      return 'Name must be at least 2 characters';
+    }
+  }
+
+  return null;
+}
+
 const TemplateForm: React.FC<TemplateFormProps> = ({ navigation, route }) => {
   const template = getTemplateById(route.params.templateId);
 
@@ -63,6 +117,10 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ navigation, route }) => {
   const [saved, setSaved] = useState(false);
   const [savedRecord, setSavedRecord] = useState<ConsentRecord | null>(null);
   const [activeFieldIndex, setActiveFieldIndex] = useState(-1);
+  // Track which fields have been blurred (touched) to show errors only after interaction
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+  // Track whether user attempted to submit (show all errors)
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   // Animate progress bar
   const progressAnim = useRef(new Animated.Value(0)).current;
@@ -87,6 +145,27 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ navigation, route }) => {
   }, [template, fieldValues, signatureA, signatureB]);
 
   const progress = totalRequired > 0 ? completedCount / totalRequired : 0;
+
+  // Compute all field errors
+  const fieldErrors = useMemo(() => {
+    if (!template) return {};
+    const errors: Record<string, string | null> = {};
+    for (const field of template.fields) {
+      errors[field.key] = validateField(
+        field.key,
+        fieldValues[field.key] || '',
+        field.type,
+        field.required,
+        template.id
+      );
+    }
+    return errors;
+  }, [template, fieldValues]);
+
+  // Check whether a field error should be shown (touched or submit attempted)
+  const shouldShowError = (key: string): boolean => {
+    return (touchedFields[key] || submitAttempted) && !!fieldErrors[key];
+  };
 
   useEffect(() => {
     Animated.timing(progressAnim, {
@@ -121,9 +200,15 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ navigation, route }) => {
     setFieldValues((prev) => ({ ...prev, [key]: value }));
   };
 
+  const markFieldTouched = (key: string) => {
+    setTouchedFields((prev) => ({ ...prev, [key]: true }));
+  };
+
   const isFormValid = (): boolean => {
+    // Check all fields pass validation (no errors)
     for (const field of template.fields) {
-      if (field.required && !fieldValues[field.key]?.trim()) return false;
+      const error = validateField(field.key, fieldValues[field.key] || '', field.type, field.required, template.id);
+      if (error) return false;
     }
     if (!signatureA) return false;
     if (template.requiresDualSignature && !signatureB) return false;
@@ -131,8 +216,24 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ navigation, route }) => {
   };
 
   const handleSave = async () => {
+    setSubmitAttempted(true);
+
     if (!isFormValid()) {
-      Alert.alert('Incomplete Form', 'Please fill in all required fields and provide signature(s).');
+      // Collect specific error messages
+      const errorMessages: string[] = [];
+      for (const field of template.fields) {
+        const err = validateField(field.key, fieldValues[field.key] || '', field.type, field.required, template.id);
+        if (err) errorMessages.push(`${field.label}: ${err}`);
+      }
+      if (!signatureA) errorMessages.push('Signature required');
+      if (template.requiresDualSignature && !signatureB) errorMessages.push('Second signature required');
+
+      Alert.alert(
+        'Incomplete Form',
+        errorMessages.length > 0
+          ? errorMessages.slice(0, 5).join('\n') + (errorMessages.length > 5 ? `\n...and ${errorMessages.length - 5} more` : '')
+          : 'Please fill in all required fields and provide signature(s).'
+      );
       return;
     }
 
@@ -261,45 +362,58 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ navigation, route }) => {
             {/* Form Fields */}
             <View style={styles.formSection}>
               <Text style={styles.sectionTitle}>Details</Text>
-              {template.fields.map((field, index) => (
-                <View
-                  key={field.key}
-                  style={[
-                    styles.fieldContainer,
-                    activeFieldIndex === index && styles.fieldContainerActive,
-                  ]}
-                >
-                  <Text style={styles.fieldLabel}>
-                    {field.label}
-                    {field.required && <Text style={styles.requiredStar}> *</Text>}
-                  </Text>
-                  <TextInput
+              {template.fields.map((field, index) => {
+                const hasError = shouldShowError(field.key);
+                const errorMsg = fieldErrors[field.key];
+                const isValid = fieldValues[field.key]?.trim() && !errorMsg;
+
+                return (
+                  <View
+                    key={field.key}
                     style={[
-                      styles.fieldInput,
-                      field.type === 'multiline' && styles.fieldInputMultiline,
-                      activeFieldIndex === index && styles.fieldInputActive,
-                      fieldValues[field.key]?.trim() && styles.fieldInputFilled,
+                      styles.fieldContainer,
+                      activeFieldIndex === index && styles.fieldContainerActive,
                     ]}
-                    placeholder={field.placeholder}
-                    placeholderTextColor={Colors.textTertiary}
-                    value={fieldValues[field.key] || ''}
-                    onChangeText={(text) => updateField(field.key, text)}
-                    onFocus={() => setActiveFieldIndex(index)}
-                    onBlur={() => setActiveFieldIndex(-1)}
-                    multiline={field.type === 'multiline'}
-                    numberOfLines={field.type === 'multiline' ? 4 : 1}
-                    keyboardType={
-                      field.type === 'email' ? 'email-address'
-                        : field.type === 'number' ? 'numeric'
-                        : 'default'
-                    }
-                    textAlignVertical={field.type === 'multiline' ? 'top' : 'center'}
-                  />
-                  {fieldValues[field.key]?.trim() && field.required && (
-                    <Text style={styles.fieldCheck}>{'\u2713'}</Text>
-                  )}
-                </View>
-              ))}
+                  >
+                    <Text style={styles.fieldLabel}>
+                      {field.label}
+                      {field.required && <Text style={styles.requiredStar}> *</Text>}
+                    </Text>
+                    <TextInput
+                      style={[
+                        styles.fieldInput,
+                        field.type === 'multiline' && styles.fieldInputMultiline,
+                        activeFieldIndex === index && styles.fieldInputActive,
+                        isValid && styles.fieldInputFilled,
+                        hasError && styles.fieldInputError,
+                      ]}
+                      placeholder={field.placeholder}
+                      placeholderTextColor={Colors.textTertiary}
+                      value={fieldValues[field.key] || ''}
+                      onChangeText={(text) => updateField(field.key, text)}
+                      onFocus={() => setActiveFieldIndex(index)}
+                      onBlur={() => {
+                        setActiveFieldIndex(-1);
+                        markFieldTouched(field.key);
+                      }}
+                      multiline={field.type === 'multiline'}
+                      numberOfLines={field.type === 'multiline' ? 4 : 1}
+                      keyboardType={
+                        field.type === 'email' ? 'email-address'
+                          : field.type === 'number' ? 'numeric'
+                          : 'default'
+                      }
+                      textAlignVertical={field.type === 'multiline' ? 'top' : 'center'}
+                    />
+                    {isValid && field.required && (
+                      <Text style={styles.fieldCheck}>{'\u2713'}</Text>
+                    )}
+                    {hasError && (
+                      <Text style={styles.fieldError}>{errorMsg}</Text>
+                    )}
+                  </View>
+                );
+              })}
             </View>
 
             {/* Consent Text Preview */}
@@ -570,6 +684,10 @@ const styles = StyleSheet.create({
   fieldInputFilled: {
     borderColor: Colors.success,
   },
+  fieldInputError: {
+    borderColor: Colors.error,
+    backgroundColor: '#FFF5F5',
+  },
   fieldCheck: {
     position: 'absolute',
     right: 12,
@@ -577,6 +695,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.success,
     fontWeight: '600',
+  },
+  fieldError: {
+    ...Typography.caption,
+    color: Colors.error,
+    marginTop: 4,
+    fontWeight: '500',
   },
   previewSection: {
     marginBottom: Spacing.section,

@@ -108,8 +108,14 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
   const handleRecordPress = (record: ConsentRecord) => {
     Alert.alert(
       record.title,
-      `Status: ${record.status}\nCreated: ${new Date(record.createdAt).toLocaleDateString()}\nParties: ${record.parties.map((p) => p.name).join(', ')}`,
+      `Status: ${record.status}\nCreated: ${new Date(record.createdAt).toLocaleDateString()}\nParties: ${record.parties.map((p) => p.name).join(', ')}${record.documentHash ? '\n\nSHA-256: ' + record.documentHash.substring(0, 24) + '...' : ''}`,
       [
+        {
+          text: 'View Details',
+          onPress: () => {
+            navigation.navigate('PDFPreview', { recordId: record.id });
+          },
+        },
         {
           text: 'Export PDF',
           onPress: async () => {
@@ -128,7 +134,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
               onPress: () => {
                 Alert.alert(
                   'Revoke Consent',
-                  'Are you sure? This cannot be undone.',
+                  'Are you sure you want to revoke this consent? This action cannot be undone.\n\nThe record hash will be recomputed to reflect the revocation.',
                   [
                     { text: 'Cancel', style: 'cancel' as const },
                     {
@@ -137,6 +143,10 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
                       onPress: async () => {
                         await db.revokeRecord(record.id);
                         loadData();
+                        Alert.alert(
+                          'Consent Revoked',
+                          'The consent has been revoked and the document hash has been updated to reflect this modification.'
+                        );
                       },
                     },
                   ]

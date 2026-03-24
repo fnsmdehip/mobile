@@ -3,6 +3,7 @@
  *
  * All consent records are stored encrypted via the vault.
  * Provides CRUD operations, search, and filtering.
+ * SHA-256 integrity hashing covers ALL form fields + signatures + timestamps + metadata.
  */
 
 import vault from './encryption';
@@ -39,7 +40,42 @@ function generateId(): string {
   return `cr_${timestamp}_${random}`;
 }
 
+/**
+ * Compute a canonical hash payload from a consent record.
+ * Includes ALL fields that matter for integrity: form fields, signatures,
+ * timestamps, parties, consent text, status, metadata, and expiry info.
+ * The hash changes if ANY of these fields are modified.
+ */
+function buildHashPayload(record: ConsentRecord): string {
+  return JSON.stringify({
+    templateId: record.templateId,
+    templateName: record.templateName,
+    title: record.title,
+    status: record.status,
+    createdAt: record.createdAt,
+    expiresAt: record.expiresAt,
+    revokedAt: record.revokedAt,
+    parties: record.parties,
+    consentText: record.consentText,
+    signatures: record.signatures.map((s) => ({
+      partyName: s.partyName,
+      signatureImage: s.signatureImage,
+      timestamp: s.timestamp,
+    })),
+    metadata: record.metadata,
+  });
+}
+
 class DatabaseService {
+  /**
+   * Compute SHA-256 hash of a record's canonical content.
+   * Exported so other modules (PDF, preview) can recompute and verify.
+   */
+  async computeRecordHash(record: ConsentRecord): Promise<string> {
+    const payload = buildHashPayload(record);
+    return vault.sha256(payload);
+  }
+
   /**
    * Create a new consent record.
    */
@@ -49,15 +85,8 @@ class DatabaseService {
     const id = generateId();
     const fullRecord: ConsentRecord = { ...record, id };
 
-    // Generate document hash for tamper detection
-    const hashContent = JSON.stringify({
-      title: fullRecord.title,
-      consentText: fullRecord.consentText,
-      parties: fullRecord.parties,
-      signatures: fullRecord.signatures,
-      createdAt: fullRecord.createdAt,
-    });
-    fullRecord.documentHash = await vault.sha256(hashContent);
+    // Generate SHA-256 hash over ALL form fields + signatures + timestamp + metadata
+    fullRecord.documentHash = await this.computeRecordHash(fullRecord);
 
     await vault.encryptAndStore(
       `record_${id}`,
@@ -86,6 +115,8 @@ class DatabaseService {
 
   /**
    * Update an existing consent record.
+   * Recomputes the SHA-256 hash over all fields so the hash
+   * reflects the current state (e.g. after revocation).
    */
   async updateRecord(
     id: string,
@@ -96,15 +127,8 @@ class DatabaseService {
 
     const updated: ConsentRecord = { ...existing, ...updates, id };
 
-    // Recompute document hash
-    const hashContent = JSON.stringify({
-      title: updated.title,
-      consentText: updated.consentText,
-      parties: updated.parties,
-      signatures: updated.signatures,
-      createdAt: updated.createdAt,
-    });
-    updated.documentHash = await vault.sha256(hashContent);
+    // Recompute SHA-256 over all canonical fields
+    updated.documentHash = await this.computeRecordHash(updated);
 
     await vault.encryptAndStore(
       `record_${id}`,
@@ -235,24 +259,31 @@ class DatabaseService {
   }
 
   /**
-   * Verify a record's integrity hash.
+   * Verify a record's integrity by recomputing SHA-256 from all fields
+   * and comparing against the stored hash. Returns { verified, storedHash, computedHash }.
    */
   async verifyRecordIntegrity(
     id: string
-  ): Promise<boolean> {
+  ): Promise<{ verified: boolean; storedHash: string | null; computedHash: string | null }> {
     const record = await this.getRecord(id);
-    if (!record || !record.documentHash) return false;
+    if (!record || !record.documentHash) {
+      return { verified: false, storedHash: null, computedHash: null };
+    }
 
-    const hashContent = JSON.stringify({
-      title: record.title,
-      consentText: record.consentText,
-      parties: record.parties,
-      signatures: record.signatures,
-      createdAt: record.createdAt,
-    });
-    const currentHash = await vault.sha256(hashContent);
+    const computedHash = await this.computeRecordHash(record);
+    return {
+      verified: computedHash === record.documentHash,
+      storedHash: record.documentHash,
+      computedHash,
+    };
+  }
 
-    return currentHash === record.documentHash;
+  /**
+   * Simple boolean integrity check (backward compat).
+   */
+  async isRecordIntact(id: string): Promise<boolean> {
+    const result = await this.verifyRecordIntegrity(id);
+    return result.verified;
   }
 
   /**

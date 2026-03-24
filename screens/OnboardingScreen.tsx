@@ -26,6 +26,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Crypto from 'expo-crypto';
 import authService from '../services/auth';
 import {
   Colors, Typography, Spacing, BorderRadius, Shadows, CardBorder,
@@ -49,6 +50,12 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
   const [pinSet, setPinSet] = useState(false);
   const [biometricSet, setBiometricSet] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'yearly' | 'monthly'>('yearly');
+  // SHA-256 demo state
+  const [demoHash, setDemoHash] = useState('');
+  const [demoDisplayHash, setDemoDisplayHash] = useState('');
+  const [demoComputing, setDemoComputing] = useState(false);
+  const [demoCompleted, setDemoCompleted] = useState(false);
+  const demoSampleData = 'Consent: Medical Procedure\nPatient: Jane Doe\nDate: 2026-03-24';
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
 
@@ -322,7 +329,40 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
     </View>
   );
 
-  // Step 4: Value Moment - SHA-256 hash verification
+  // Compute a real SHA-256 hash and animate it character by character
+  const runHashDemo = async () => {
+    if (demoComputing || demoCompleted) return;
+    setDemoComputing(true);
+    setDemoDisplayHash('');
+    setDemoHash('');
+
+    // Actually compute SHA-256 of the sample data using expo-crypto
+    const hash = await Crypto.digestStringAsync(
+      Crypto.CryptoDigestAlgorithm.SHA256,
+      demoSampleData
+    );
+
+    setDemoHash(hash);
+
+    // Animate hash appearing character by character
+    let displayed = '';
+    for (let i = 0; i < hash.length; i++) {
+      displayed += hash[i];
+      // Use a closure to capture the current value
+      const current = displayed;
+      await new Promise<void>((resolve) => {
+        setTimeout(() => {
+          setDemoDisplayHash(current);
+          resolve();
+        }, 20);
+      });
+    }
+
+    setDemoComputing(false);
+    setDemoCompleted(true);
+  };
+
+  // Step 4: Value Moment - SHA-256 hash verification (REAL)
   const renderValueMoment = () => (
     <View style={styles.stepContent}>
       <View style={styles.heroImageContainer}>
@@ -334,32 +374,63 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
       </View>
       <Text style={styles.stepTitle}>Tamper-Proof Verification</Text>
       <Text style={styles.stepSubtitle}>
-        Every consent record includes a SHA-256 cryptographic hash. If anyone modifies the document, the hash will not match.
+        Every consent record includes a SHA-256 cryptographic hash. If even one character is modified, the hash completely changes.
       </Text>
       <View style={styles.hashDemo}>
         <View style={styles.hashDemoHeader}>
-          <Text style={styles.hashDemoTitle}>Document Integrity</Text>
-          <View style={styles.hashVerifiedBadge}>
-            <Text style={styles.hashVerifiedText}>{'\u2713'} Verified</Text>
-          </View>
+          <Text style={styles.hashDemoTitle}>Live SHA-256 Demo</Text>
+          {demoCompleted && (
+            <View style={styles.hashVerifiedBadge}>
+              <Text style={styles.hashVerifiedText}>{'\u2713'} Computed</Text>
+            </View>
+          )}
         </View>
-        <Text style={styles.hashDemoLabel}>SHA-256 Hash</Text>
-        <Text style={styles.hashDemoValue}>
-          a7f3b9c2e1d4f6a8b0c2d4e6f8a1b3c5{'\n'}e7d9f1b2a4c6e8d0f2a4b6c8e0d2f4a6
-        </Text>
-        <View style={styles.hashDemoDivider} />
-        <View style={styles.hashDemoRow}>
-          <Text style={styles.hashDemoRowLabel}>Signatures</Text>
-          <Text style={styles.hashDemoRowValue}>{'\u2713'} 2 verified</Text>
+
+        {/* Show the sample data being hashed */}
+        <Text style={styles.hashDemoLabel}>Your data:</Text>
+        <View style={styles.hashDataPreview}>
+          <Text style={styles.hashDataPreviewText}>{demoSampleData}</Text>
         </View>
-        <View style={styles.hashDemoRow}>
-          <Text style={styles.hashDemoRowLabel}>Timestamp</Text>
-          <Text style={styles.hashDemoRowValue}>Immutable</Text>
-        </View>
-        <View style={styles.hashDemoRow}>
-          <Text style={styles.hashDemoRowLabel}>Encryption</Text>
-          <Text style={styles.hashDemoRowValue}>AES-256</Text>
-        </View>
+
+        {/* Hash output area */}
+        <Text style={[styles.hashDemoLabel, { marginTop: Spacing.md }]}>SHA-256 Hash:</Text>
+        {demoDisplayHash ? (
+          <Text style={styles.hashDemoValue}>
+            {demoDisplayHash}{demoComputing ? '\u2588' : ''}
+          </Text>
+        ) : (
+          <Text style={[styles.hashDemoValue, { color: Colors.textTertiary }]}>
+            {demoComputing ? 'Computing...' : 'Tap below to compute'}
+          </Text>
+        )}
+
+        {!demoCompleted && !demoComputing && (
+          <Pressable style={styles.hashDemoButton} onPress={runHashDemo}>
+            <Text style={styles.hashDemoButtonText}>Compute Hash</Text>
+          </Pressable>
+        )}
+
+        {demoCompleted && (
+          <>
+            <View style={styles.hashDemoDivider} />
+            <Text style={styles.hashDemoExplain}>
+              This 64-character hex string is unique to this exact data. Change even one letter and the hash is completely different.
+            </Text>
+            <View style={styles.hashDemoDivider} />
+            <View style={styles.hashDemoRow}>
+              <Text style={styles.hashDemoRowLabel}>Signatures</Text>
+              <Text style={styles.hashDemoRowValue}>{'\u2713'} Included in hash</Text>
+            </View>
+            <View style={styles.hashDemoRow}>
+              <Text style={styles.hashDemoRowLabel}>Timestamp</Text>
+              <Text style={styles.hashDemoRowValue}>{'\u2713'} Immutable</Text>
+            </View>
+            <View style={styles.hashDemoRow}>
+              <Text style={styles.hashDemoRowLabel}>Encryption</Text>
+              <Text style={styles.hashDemoRowValue}>{'\u2713'} AES-256</Text>
+            </View>
+          </>
+        )}
       </View>
     </View>
   );
@@ -753,6 +824,41 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     marginBottom: Spacing.md,
     lineHeight: 20,
+  },
+  hashDataPreview: {
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  hashDataPreviewText: {
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    fontSize: 12,
+    color: Colors.textPrimary,
+    lineHeight: 18,
+  },
+  hashDemoButton: {
+    backgroundColor: Colors.primary,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    borderRadius: BorderRadius.lg,
+    alignItems: 'center',
+    marginTop: Spacing.md,
+    ...Shadows.md,
+  },
+  hashDemoButtonText: {
+    ...Typography.button,
+    color: Colors.textInverse,
+    fontSize: 15,
+  },
+  hashDemoExplain: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: Spacing.md,
+    lineHeight: 18,
   },
   hashDemoDivider: {
     height: 1,

@@ -41,6 +41,8 @@ const PDFPreviewScreen: React.FC<PDFPreviewScreenProps> = ({ navigation, route }
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [integrityVerified, setIntegrityVerified] = useState<boolean | null>(null);
+  const [storedHash, setStoredHash] = useState<string | null>(null);
+  const [computedHash, setComputedHash] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -48,8 +50,10 @@ const PDFPreviewScreen: React.FC<PDFPreviewScreenProps> = ({ navigation, route }
         const r = await db.getRecord(route.params.recordId);
         setRecord(r);
         if (r) {
-          const verified = await db.verifyRecordIntegrity(r.id);
-          setIntegrityVerified(verified);
+          const result = await db.verifyRecordIntegrity(r.id);
+          setIntegrityVerified(result.verified);
+          setStoredHash(result.storedHash);
+          setComputedHash(result.computedHash);
         }
       } catch (_e) {
         Alert.alert('Error', 'Failed to load record.');
@@ -129,13 +133,33 @@ const PDFPreviewScreen: React.FC<PDFPreviewScreenProps> = ({ navigation, route }
               />
             )}
             <View style={styles.integrityInfo}>
-              <Text style={styles.integrityTitle}>
-                {integrityVerified === true ? 'Document Integrity Verified' :
-                 integrityVerified === false ? 'Integrity Check Failed' : 'Checking...'}
+              <Text style={[
+                styles.integrityTitle,
+                integrityVerified === true && { color: '#065F46' },
+                integrityVerified === false && { color: '#B91C1C' },
+              ]}>
+                {integrityVerified === true ? 'Integrity Verified' :
+                 integrityVerified === false ? 'Record Modified' : 'Checking...'}
               </Text>
-              {record.documentHash && (
+              <Text style={[
+                styles.integritySubtitle,
+                integrityVerified === true && { color: '#047857' },
+                integrityVerified === false && { color: '#DC2626' },
+              ]}>
+                {integrityVerified === true
+                  ? 'SHA-256 hash matches. No modifications detected.'
+                  : integrityVerified === false
+                  ? 'SHA-256 hash mismatch. Record may have been tampered with.'
+                  : 'Recomputing SHA-256 hash...'}
+              </Text>
+              {storedHash && (
                 <Text style={styles.integrityHash}>
-                  SHA-256: {record.documentHash.substring(0, 24)}...
+                  Stored: {storedHash.substring(0, 20)}...
+                </Text>
+              )}
+              {computedHash && integrityVerified === false && (
+                <Text style={[styles.integrityHash, { color: Colors.error }]}>
+                  Computed: {computedHash.substring(0, 20)}...
                 </Text>
               )}
             </View>
@@ -348,6 +372,11 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.textPrimary,
     fontWeight: '600',
+  },
+  integritySubtitle: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    marginTop: 2,
   },
   integrityHash: {
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',

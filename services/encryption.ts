@@ -253,6 +253,31 @@ class EncryptionVault {
   }
 
   /**
+   * Self-test: encrypt then decrypt a known plaintext to verify
+   * the vault is actually producing unreadable ciphertext that
+   * round-trips correctly. Throws on failure.
+   */
+  async selfTest(): Promise<{ encrypted: string; decrypted: string; match: boolean }> {
+    this.ensureUnlocked();
+    const testPlaintext = 'cnsnt_vault_selftest_' + Date.now().toString();
+    const encrypted = await xorCipher(testPlaintext, this.vaultKey!);
+
+    // Verify encrypted text is NOT the same as plaintext (actually encrypted)
+    if (encrypted === testPlaintext) {
+      throw new Error('Encryption self-test failed: ciphertext equals plaintext');
+    }
+
+    // Verify decryption recovers the original
+    const decrypted = await xorDecipher(encrypted, this.vaultKey!);
+    const match = decrypted === testPlaintext;
+    if (!match) {
+      throw new Error('Encryption self-test failed: round-trip mismatch');
+    }
+
+    return { encrypted, decrypted, match };
+  }
+
+  /**
    * Lock the vault, clearing the in-memory key.
    */
   lock(): void {
