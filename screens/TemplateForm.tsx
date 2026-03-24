@@ -28,6 +28,18 @@ import purchaseService from '../services/purchases';
 import type { ConsentRecord, SignatureData, PartyInfo } from '../types';
 import { Colors, Typography, Spacing, BorderRadius, Shadows, MIN_TOUCH_SIZE, Assets } from '../constants/theme';
 
+const TEMPLATE_ICON_MAP: Record<string, number> = {
+  tpl_medical_consent: Assets.iconChecklist,
+  tpl_photo_video_release: Assets.iconVideo,
+  tpl_nda: Assets.iconCloudLock,
+  tpl_gdpr_consent: Assets.iconShield,
+  tpl_research_participation: Assets.iconChecklist,
+  tpl_property_entry: Assets.iconSignature,
+  tpl_liability_waiver: Assets.iconShield,
+  tpl_mutual_release: Assets.iconSignature,
+  tpl_personal_consent: Assets.iconSignature,
+};
+
 interface TemplateFormProps {
   navigation: {
     goBack: () => void;
@@ -237,7 +249,7 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ navigation, route }) => {
             {/* Template Header */}
             <View style={styles.templateHeader}>
               <View style={styles.templateIconContainer}>
-                <Text style={styles.templateIcon}>{template.icon}</Text>
+                <Image source={TEMPLATE_ICON_MAP[template.id] || Assets.iconChecklist} style={styles.templateImage} resizeMode="contain" />
               </View>
               <View style={styles.templateHeaderText}>
                 <Text style={styles.templateName}>{template.name}</Text>
@@ -495,6 +507,10 @@ const styles = StyleSheet.create({
   },
   templateIcon: {
     fontSize: 28,
+  },
+  templateImage: {
+    width: 32,
+    height: 32,
   },
   templateHeaderText: {
     flex: 1,

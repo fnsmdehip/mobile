@@ -5,10 +5,10 @@
  */
 
 import React, { useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import { ScrollView, View, Text, Image, StyleSheet, Pressable, Alert } from 'react-native';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/theme';
+import { Colors, Typography, Spacing, BorderRadius, Shadows, Assets } from '../constants/theme';
 
 const initialItems: string[] = [
   'I have read and understood the purpose of this consent.',
@@ -62,7 +62,7 @@ const ConsentBuilderScreen: React.FC = () => {
       contentContainerStyle={styles.container}
     >
       <View style={styles.header}>
-        <Text style={styles.headerIcon}>{'\u{2705}'}</Text>
+        <Image source={Assets.iconChecklist} style={styles.headerImage} resizeMode="contain" />
         <Text style={styles.heading}>Consent Checklist</Text>
       </View>
 
@@ -110,6 +110,11 @@ const styles = StyleSheet.create({
   },
   headerIcon: {
     fontSize: 28,
+    marginRight: Spacing.md,
+  },
+  headerImage: {
+    width: 28,
+    height: 28,
     marginRight: Spacing.md,
   },
   heading: {

@@ -303,7 +303,7 @@ const Settings: React.FC<SettingsProps> = ({ onLock }) => {
 
             <Pressable style={[styles.settingAction, styles.settingActionDanger]} onPress={handleDeleteAll}>
               <View style={[styles.settingIconContainer, { backgroundColor: Colors.errorLight }]}>
-                <Text style={styles.settingIcon}>{'\u{1F5D1}'}</Text>
+                <Image source={Assets.iconShield} style={styles.settingImage} resizeMode="contain" />
               </View>
               <Text style={styles.settingActionDangerText}>Delete All Data</Text>
             </Pressable>
@@ -483,6 +483,10 @@ const styles = StyleSheet.create({
   },
   settingIcon: {
     fontSize: 18,
+  },
+  settingImage: {
+    width: 20,
+    height: 20,
   },
   settingInfo: {
     flex: 1,

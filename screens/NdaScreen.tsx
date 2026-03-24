@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Text, StyleSheet, TextInput, Pressable, Alert, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, Image, StyleSheet, TextInput, Pressable, Alert, ActivityIndicator } from 'react-native';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
 import { Asset } from 'expo-asset';
@@ -14,7 +14,7 @@ import * as Print from 'expo-print';
 import Markdown from 'react-native-markdown-display';
 import * as SecureStore from 'expo-secure-store';
 import DualSignature from '../components/DualSignature';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/theme';
+import { Colors, Typography, Spacing, BorderRadius, Shadows, Assets } from '../constants/theme';
 
 const ndaAssetModule = require('../assets/templates/form-templates/nda_template.md');
 
@@ -101,7 +101,7 @@ const NdaScreen: React.FC = () => {
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerIcon}>{'\u{1F512}'}</Text>
+        <Image source={Assets.iconCloudLock} style={styles.headerImage} resizeMode="contain" />
         <Text style={styles.heading}>Non-Disclosure Agreement</Text>
       </View>
 
@@ -152,6 +152,7 @@ const styles = StyleSheet.create({
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.lg },
   headerIcon: { fontSize: 28, marginRight: Spacing.md },
+  headerImage: { width: 28, height: 28, marginRight: Spacing.md },
   heading: { ...Typography.h2, color: Colors.textPrimary },
   input: {
     backgroundColor: Colors.surface,

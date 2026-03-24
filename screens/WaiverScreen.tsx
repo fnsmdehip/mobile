@@ -3,7 +3,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Text, TextInput, StyleSheet, Alert, Pressable, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, Image, TextInput, StyleSheet, Alert, Pressable, ActivityIndicator } from 'react-native';
 import Markdown from 'react-native-markdown-display';
 import * as Sharing from 'expo-sharing';
 import * as Print from 'expo-print';
@@ -11,7 +11,7 @@ import * as FileSystem from 'expo-file-system';
 import { Asset } from 'expo-asset';
 import DualSignature from '../components/DualSignature';
 import * as SecureStore from 'expo-secure-store';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../constants/theme';
+import { Colors, Typography, Spacing, BorderRadius, Shadows, Assets } from '../constants/theme';
 
 const waiverTemplate = require('../assets/templates/form-templates/waiver_template.md');
 
@@ -89,7 +89,7 @@ const WaiverScreen: React.FC = () => {
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerIcon}>{'\u{26A0}\uFE0F'}</Text>
+        <Image source={Assets.iconShield} style={styles.headerImage} resizeMode="contain" />
         <Text style={styles.heading}>Liability Waiver</Text>
       </View>
 
@@ -133,6 +133,7 @@ const styles = StyleSheet.create({
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background },
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.lg },
   headerIcon: { fontSize: 28, marginRight: Spacing.md },
+  headerImage: { width: 28, height: 28, marginRight: Spacing.md },
   heading: { ...Typography.h2, color: Colors.textPrimary },
   input: {
     backgroundColor: Colors.surface,

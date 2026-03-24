@@ -303,17 +303,17 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
         contentContainerStyle={styles.templateCarousel}
       >
         {[
-          { icon: '\u{1F3E5}', name: 'Medical', desc: 'Informed consent' },
-          { icon: '\u{1F4F7}', name: 'Photo/Video', desc: 'Media release' },
-          { icon: '\u{1F512}', name: 'NDA', desc: 'Confidentiality' },
-          { icon: '\u{1F6E1}', name: 'GDPR', desc: 'Data processing' },
-          { icon: '\u{1F52C}', name: 'Research', desc: 'Study consent' },
-          { icon: '\u{1F3E0}', name: 'Property', desc: 'Entry auth' },
-          { icon: '\u{26A0}', name: 'Liability', desc: 'Waiver' },
-          { icon: '\u{1F91D}', name: 'Mutual', desc: 'Both parties' },
+          { asset: Assets.iconChecklist, name: 'Medical', desc: 'Informed consent' },
+          { asset: Assets.iconVideo, name: 'Photo/Video', desc: 'Media release' },
+          { asset: Assets.iconCloudLock, name: 'NDA', desc: 'Confidentiality' },
+          { asset: Assets.iconShield, name: 'GDPR', desc: 'Data processing' },
+          { asset: Assets.iconChecklist, name: 'Research', desc: 'Study consent' },
+          { asset: Assets.iconSignature, name: 'Property', desc: 'Entry auth' },
+          { asset: Assets.iconShield, name: 'Liability', desc: 'Waiver' },
+          { asset: Assets.iconSignature, name: 'Mutual', desc: 'Both parties' },
         ].map((t, i) => (
           <View key={i} style={styles.demoTemplateCard}>
-            <Text style={styles.demoTemplateIcon}>{t.icon}</Text>
+            <Image source={t.asset} style={styles.demoTemplateImage} resizeMode="contain" />
             <Text style={styles.demoTemplateName}>{t.name}</Text>
             <Text style={styles.demoTemplateDesc}>{t.desc}</Text>
           </View>
@@ -693,6 +693,11 @@ const styles = StyleSheet.create({
   },
   demoTemplateIcon: {
     fontSize: 32,
+    marginBottom: Spacing.sm,
+  },
+  demoTemplateImage: {
+    width: 36,
+    height: 36,
     marginBottom: Spacing.sm,
   },
   demoTemplateName: {
